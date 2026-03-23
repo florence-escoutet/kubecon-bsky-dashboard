@@ -97,7 +97,8 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: !isMobile,
+                maintainAspectRatio: true,
+                aspectRatio: isMobile ? 2 : 3,
                 interaction: { mode: "index", intersect: false },
                 plugins: {
                     legend: { position: "top", align: "end", labels: { boxWidth: 10, padding: 10, font: { size: 11 } } },
