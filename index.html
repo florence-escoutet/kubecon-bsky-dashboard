@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KubeCon EU 2026 — Bluesky Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦋</text></svg>">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="header-left">
+                <h1>🦋 KubeCon EU 2026 <span class="subtitle">Bluesky Pulse</span></h1>
+                <p class="header-meta">Amsterdam · March 23–26 · Live social signal dashboard</p>
+            </div>
+            <div class="header-right">
+                <div class="stat-pill" id="meta-updated">—</div>
+                <div class="stat-pill" id="meta-posts">—</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab active" data-tab="overview">📊 Overview</button>
+        <button class="tab" data-tab="feed">📡 Live Feed</button>
+        <button class="tab" data-tab="top">🔥 Top Posts</button>
+        <button class="tab" data-tab="people">👤 People</button>
+        <button class="tab" data-tab="topics">🏷️ Topics</button>
+    </nav>
+
+    <main>
+        <!-- ── Overview ──────────────────────────────────────────── -->
+        <section id="tab-overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total-posts">—</div>
+                    <div class="stat-label">Total Posts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total-authors">—</div>
+                    <div class="stat-label">Authors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-24h-posts">—</div>
+                    <div class="stat-label">Last 24h</div>
+                </div>
+                <div class="stat-card accent">
+                    <div class="stat-value" id="stat-total-likes">—</div>
+                    <div class="stat-label">Total ❤️</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total-reposts">—</div>
+                    <div class="stat-label">Total 🔁</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-both">—</div>
+                    <div class="stat-label">Feed ∩ Search</div>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card wide">
+                    <h3>📈 Activity Timeline</h3>
+                    <canvas id="chart-timeline"></canvas>
+                </div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>📂 Categories</h3>
+                    <canvas id="chart-categories"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>☁️ Hashtags</h3>
+                    <div id="hashtag-cloud"></div>
+                </div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>📡 Source Breakdown</h3>
+                    <canvas id="chart-sources"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>🔗 Top Shared Links</h3>
+                    <div id="links-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Live Feed ─────────────────────────────────────────── -->
+        <section id="tab-feed" class="tab-content">
+            <div class="feed-controls">
+                <input type="text" id="feed-search" placeholder="🔍 Filter posts..." class="search-input">
+            </div>
+            <div id="feed-list" class="feed-list"></div>
+        </section>
+
+        <!-- ── Top Posts ─────────────────────────────────────────── -->
+        <section id="tab-top" class="tab-content">
+            <div id="top-posts-list" class="feed-list"></div>
+        </section>
+
+        <!-- ── People ────────────────────────────────────────────── -->
+        <section id="tab-people" class="tab-content">
+            <div id="authors-grid" class="authors-grid"></div>
+        </section>
+
+        <!-- ── Topics ────────────────────────────────────────────── -->
+        <section id="tab-topics" class="tab-content">
+            <div class="charts-row">
+                <div class="chart-card wide">
+                    <h3>Category Engagement</h3>
+                    <canvas id="chart-cat-engagement"></canvas>
+                </div>
+            </div>
+            <div id="hashtag-table"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Data collected from <a href="https://bsky.app/profile/did:plc:cwwcoprxc5eikcg4j2nvtvuk/feed/aaahpocr6jlk2" target="_blank">Noah's KubeCon Feed</a> + Bluesky Search API · 
+        <a href="https://github.com/florence-escoutet/kubecon-bsky-monitor" target="_blank">Source</a></p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
