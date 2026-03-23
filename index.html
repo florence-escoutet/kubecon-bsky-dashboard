@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KubeCon EU 2026 — Bluesky Dashboard</title>
+    <title>KubeCon EU 2026 — Bluesky Pulse</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,111 +18,113 @@
                 <p class="header-meta">Amsterdam · March 23–26 · Live social signal dashboard</p>
             </div>
             <div class="header-right">
-                <div class="stat-pill" id="meta-updated">—</div>
-                <div class="stat-pill" id="meta-posts">—</div>
+                <div class="stat-pill">Updated <span class="pill-value" id="meta-updated">—</span></div>
+                <div class="stat-pill"><span class="pill-value" id="meta-posts">—</span> posts tracked</div>
             </div>
         </div>
     </header>
 
     <nav class="tabs">
         <button class="tab active" data-tab="overview">📊 Overview</button>
-        <button class="tab" data-tab="feed">📡 Live Feed</button>
+        <button class="tab" data-tab="feed">📡 Feed</button>
         <button class="tab" data-tab="top">🔥 Top Posts</button>
         <button class="tab" data-tab="people">👤 People</button>
         <button class="tab" data-tab="topics">🏷️ Topics</button>
     </nav>
 
     <main>
-        <!-- ── Overview ──────────────────────────────────────────── -->
+        <!-- ── Overview ──────────────────────────────────────── -->
         <section id="tab-overview" class="tab-content active">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-total-posts">—</div>
-                    <div class="stat-label">Total Posts</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-total-authors">—</div>
-                    <div class="stat-label">Authors</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-24h-posts">—</div>
-                    <div class="stat-label">Last 24h</div>
-                </div>
-                <div class="stat-card accent">
-                    <div class="stat-value" id="stat-total-likes">—</div>
-                    <div class="stat-label">Total ❤️</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-total-reposts">—</div>
-                    <div class="stat-label">Total 🔁</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-both">—</div>
-                    <div class="stat-label">Feed ∩ Search</div>
+            <div class="stats-strip">
+                <div class="stat-card highlight"><div class="stat-value" id="s-posts">—</div><div class="stat-label">Posts</div></div>
+                <div class="stat-card"><div class="stat-value" id="s-authors">—</div><div class="stat-label">Authors</div></div>
+                <div class="stat-card"><div class="stat-value" id="s-24h">—</div><div class="stat-label">Last 24h</div></div>
+                <div class="stat-card"><div class="stat-value" id="s-likes">—</div><div class="stat-label">❤️ Likes</div></div>
+                <div class="stat-card"><div class="stat-value" id="s-reposts">—</div><div class="stat-label">🔁 Reposts</div></div>
+                <div class="stat-card"><div class="stat-value" id="s-overlap">—</div><div class="stat-label">Feed ∩ Search</div></div>
+            </div>
+
+            <!-- Row 1: Timeline full width -->
+            <div class="grid-wide">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Activity Timeline</span>
+                        <span class="card-badge">posts per hour + engagement</span>
+                    </div>
+                    <canvas id="chart-timeline" height="80"></canvas>
                 </div>
             </div>
 
-            <div class="charts-row">
-                <div class="chart-card wide">
-                    <h3>📈 Activity Timeline</h3>
-                    <canvas id="chart-timeline"></canvas>
+            <!-- Row 2: Categories (bar) | Hashtags | Sources -->
+            <div class="grid-3">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Categories</span></div>
+                    <div id="cat-bars" class="hbar-list"></div>
                 </div>
-            </div>
-            <div class="charts-row">
-                <div class="chart-card">
-                    <h3>📂 Categories</h3>
-                    <canvas id="chart-categories"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>☁️ Hashtags</h3>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Hashtag Cloud</span></div>
                     <div id="hashtag-cloud"></div>
                 </div>
-            </div>
-            <div class="charts-row">
-                <div class="chart-card">
-                    <h3>📡 Source Breakdown</h3>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Sources</span></div>
                     <canvas id="chart-sources"></canvas>
                 </div>
-                <div class="chart-card">
-                    <h3>🔗 Top Shared Links</h3>
-                    <div id="links-list"></div>
+            </div>
+
+            <!-- Row 3: Top 5 posts | Links -->
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🔥 Trending Posts</span>
+                        <span class="card-badge">top 5 by engagement</span>
+                    </div>
+                    <div id="overview-top5" class="feed-list"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🔗 Shared Links</span>
+                        <span class="card-badge" id="links-count"></span>
+                    </div>
+                    <div id="links-list" class="links-list scroll-y"></div>
                 </div>
             </div>
         </section>
 
-        <!-- ── Live Feed ─────────────────────────────────────────── -->
+        <!-- ── Feed ──────────────────────────────────────────── -->
         <section id="tab-feed" class="tab-content">
             <div class="feed-controls">
                 <input type="text" id="feed-search" placeholder="🔍 Filter posts..." class="search-input">
             </div>
-            <div id="feed-list" class="feed-list"></div>
+            <div id="feed-list" class="feed-grid"></div>
         </section>
 
-        <!-- ── Top Posts ─────────────────────────────────────────── -->
+        <!-- ── Top Posts ─────────────────────────────────────── -->
         <section id="tab-top" class="tab-content">
             <div id="top-posts-list" class="feed-list"></div>
         </section>
 
-        <!-- ── People ────────────────────────────────────────────── -->
+        <!-- ── People ────────────────────────────────────────── -->
         <section id="tab-people" class="tab-content">
             <div id="authors-grid" class="authors-grid"></div>
         </section>
 
-        <!-- ── Topics ────────────────────────────────────────────── -->
+        <!-- ── Topics ────────────────────────────────────────── -->
         <section id="tab-topics" class="tab-content">
-            <div class="charts-row">
-                <div class="chart-card wide">
-                    <h3>Category Engagement</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Category Engagement</span></div>
                     <canvas id="chart-cat-engagement"></canvas>
                 </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">All Hashtags</span></div>
+                    <div id="hashtag-bars" class="hbar-list scroll-y"></div>
+                </div>
             </div>
-            <div id="hashtag-table"></div>
         </section>
     </main>
 
     <footer>
-        <p>Data collected from <a href="https://bsky.app/profile/did:plc:cwwcoprxc5eikcg4j2nvtvuk/feed/aaahpocr6jlk2" target="_blank">Noah's KubeCon Feed</a> + Bluesky Search API · 
-        <a href="https://github.com/florence-escoutet/kubecon-bsky-monitor" target="_blank">Source</a></p>
+        <p>Data from <a href="https://bsky.app/profile/did:plc:cwwcoprxc5eikcg4j2nvtvuk/feed/aaahpocr6jlk2" target="_blank">Noah's KubeCon Feed</a> + Bluesky Search API · <a href="https://github.com/florence-escoutet/kubecon-bsky-monitor" target="_blank">Source</a> · Apache-2.0</p>
     </footer>
 
     <script src="app.js"></script>
