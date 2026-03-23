@@ -19,7 +19,7 @@
             </div>
             <div class="header-right">
                 <div class="stat-pill">Updated <span class="pill-value" id="meta-updated">—</span></div>
-                <div class="stat-pill"><span class="pill-value" id="meta-posts">—</span> posts tracked</div>
+                <div class="stat-pill"><span class="pill-value" id="meta-posts">—</span> posts</div>
             </div>
         </div>
     </header>
@@ -44,48 +44,54 @@
                 <div class="stat-card"><div class="stat-value" id="s-overlap">—</div><div class="stat-label">Feed ∩ Search</div></div>
             </div>
 
-            <!-- Row 1: Timeline full width -->
+            <!-- Timeline -->
             <div class="grid-wide">
                 <div class="card">
                     <div class="card-header">
                         <span class="card-title">Activity Timeline</span>
-                        <span class="card-badge">posts per hour + engagement</span>
+                        <span class="card-badge">posts + engagement per hour</span>
                     </div>
                     <canvas id="chart-timeline" height="100"></canvas>
                 </div>
             </div>
 
-            <!-- Row 2: Categories (bar) | Hashtags | Sources -->
+            <!-- Categories | Word Cloud | Sources -->
             <div class="grid-3">
                 <div class="card">
                     <div class="card-header"><span class="card-title">Categories</span></div>
                     <div id="cat-bars" class="hbar-list"></div>
                 </div>
                 <div class="card">
-                    <div class="card-header"><span class="card-title">Hashtag Cloud</span></div>
-                    <div id="hashtag-cloud"></div>
+                    <div class="card-header"><span class="card-title">Word Cloud</span><span class="card-badge">click to filter</span></div>
+                    <div id="word-cloud"></div>
                 </div>
                 <div class="card">
-                    <div class="card-header"><span class="card-title">Sources</span></div>
+                    <div class="card-header"><span class="card-title">Data Sources</span></div>
                     <canvas id="chart-sources"></canvas>
                 </div>
             </div>
 
-            <!-- Row 3: Top 5 posts | Links -->
+            <!-- Trending + Links -->
             <div class="grid-2">
                 <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">🔥 Trending Posts</span>
-                        <span class="card-badge">top 5 by engagement</span>
-                    </div>
+                    <div class="card-header"><span class="card-title">🔥 Trending</span><span class="card-badge">top 5</span></div>
                     <div id="overview-top5" class="feed-list"></div>
                 </div>
                 <div class="card">
-                    <div class="card-header">
-                        <span class="card-title">🔗 Shared Links</span>
-                        <span class="card-badge" id="links-count"></span>
-                    </div>
+                    <div class="card-header"><span class="card-title">🔗 Shared Links</span><span class="card-badge" id="links-count"></span></div>
                     <div id="links-list" class="links-list scroll-y"></div>
+                </div>
+            </div>
+
+            <!-- Daily trend + Languages -->
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">📅 Daily Trend</span><span class="card-badge">posts & authors per day</span></div>
+                    <canvas id="chart-daily"></canvas>
+                </div>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">🌍 Languages</span></div>
+                    <div id="lang-bars" class="hbar-list"></div>
                 </div>
             </div>
         </section>
@@ -116,7 +122,7 @@
                     <canvas id="chart-cat-engagement"></canvas>
                 </div>
                 <div class="card">
-                    <div class="card-header"><span class="card-title">All Hashtags</span></div>
+                    <div class="card-header"><span class="card-title">Hashtags</span></div>
                     <div id="hashtag-bars" class="hbar-list scroll-y"></div>
                 </div>
             </div>
@@ -126,6 +132,17 @@
     <footer>
         <p>Data from <a href="https://bsky.app/profile/did:plc:cwwcoprxc5eikcg4j2nvtvuk/feed/aaahpocr6jlk2" target="_blank">Noah's KubeCon Feed</a> + Bluesky Search API · <a href="https://github.com/florence-escoutet/kubecon-bsky-monitor" target="_blank">Source</a> · Apache-2.0</p>
     </footer>
+
+    <!-- Word cloud click modal -->
+    <div id="word-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button class="modal-close" id="modal-close">✕</button>
+            </div>
+            <div id="modal-posts" class="feed-list scroll-y"></div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

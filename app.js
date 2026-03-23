@@ -3,7 +3,6 @@
     const resp = await fetch("data/dashboard.json");
     const D = await resp.json();
 
-    // ── Helpers ──────────────────────────────────────────────
     const $ = (s) => document.querySelector(s);
     const $$ = (s) => document.querySelectorAll(s);
     const fmt = (n) =>
@@ -20,6 +19,9 @@
     const esc = (s) =>
         s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     const isMobile = window.innerWidth < 640;
+
+    // All posts for word-cloud click-through
+    const allPosts = [...D.top_posts, ...D.recent_posts];
 
     // ── Tabs ─────────────────────────────────────────────────
     $$(".tab").forEach((btn) => {
@@ -47,7 +49,7 @@
     $("#s-reposts").textContent = fmt(S.total_reposts);
     $("#s-overlap").textContent = fmt(S.both_sources);
 
-    // ── Chart palette ────────────────────────────────────────
+    // ── Palette ──────────────────────────────────────────────
     const PAL = ["#58a6ff","#3fb950","#d29922","#f778ba","#a371f7",
                  "#f85149","#79c0ff","#56d364","#e3b341","#ff7b72"];
     Chart.defaults.color = "#8b949e";
@@ -55,10 +57,14 @@
 
     // ── Timeline ─────────────────────────────────────────────
     if (D.timeline.length) {
-        const labels = D.timeline.map((t) => {
+        // Group by showing only the last 72h for the detailed view
+        const cutoff = new Date(Date.now() - 72 * 3600 * 1000).toISOString();
+        const recent = D.timeline.filter(t => t.hour >= cutoff);
+        const tData = recent.length > 6 ? recent : D.timeline.slice(-72);
+        const labels = tData.map((t) => {
             const d = new Date(t.hour);
             return d.toLocaleDateString("en", { weekday: "short" }) +
-                " " + d.getHours().toString().padStart(2, "0") + ":00";
+                " " + d.getHours().toString().padStart(2, "0") + "h";
         });
         new Chart($("#chart-timeline"), {
             type: "bar",
@@ -67,8 +73,8 @@
                 datasets: [
                     {
                         label: "Posts",
-                        data: D.timeline.map((t) => t.count),
-                        backgroundColor: "#58a6ff55",
+                        data: tData.map((t) => t.count),
+                        backgroundColor: "#58a6ff44",
                         borderColor: "#58a6ff",
                         borderWidth: 1,
                         borderRadius: 2,
@@ -76,10 +82,10 @@
                     },
                     {
                         label: "Likes",
-                        data: D.timeline.map((t) => t.likes),
+                        data: tData.map((t) => t.likes),
                         type: "line",
                         borderColor: "#f85149",
-                        backgroundColor: "#f8514920",
+                        backgroundColor: "#f8514918",
                         fill: true,
                         tension: 0.35,
                         pointRadius: 0,
@@ -94,33 +100,65 @@
                 maintainAspectRatio: !isMobile,
                 interaction: { mode: "index", intersect: false },
                 plugins: {
-                    legend: {
-                        position: "top",
-                        align: "end",
-                        labels: { boxWidth: 12, padding: 12, font: { size: 11 } },
-                    },
+                    legend: { position: "top", align: "end", labels: { boxWidth: 10, padding: 10, font: { size: 11 } } },
                 },
                 scales: {
-                    x: {
-                        ticks: { maxRotation: 0, maxTicksLimit: isMobile ? 6 : 16, font: { size: 10 } },
-                    },
-                    y: {
-                        position: "left",
-                        title: { display: !isMobile, text: "Posts", font: { size: 11 } },
-                        ticks: { font: { size: 10 } },
-                    },
-                    y1: {
-                        position: "right",
-                        title: { display: !isMobile, text: "Likes", font: { size: 11 } },
-                        ticks: { font: { size: 10 } },
-                        grid: { display: false },
-                    },
+                    x: { ticks: { maxRotation: 0, maxTicksLimit: isMobile ? 6 : 18, font: { size: 10 } } },
+                    y: { position: "left", title: { display: !isMobile, text: "Posts", font: { size: 10 } }, ticks: { font: { size: 10 } } },
+                    y1: { position: "right", title: { display: !isMobile, text: "Likes", font: { size: 10 } }, ticks: { font: { size: 10 } }, grid: { display: false } },
                 },
             },
         });
     }
 
-    // ── Category bars (CSS horizontal bars) ──────────────────
+    // ── Daily Trend ──────────────────────────────────────────
+    if (D.daily && D.daily.length) {
+        // Show only last 14 days
+        const dailyData = D.daily.slice(-14);
+        new Chart($("#chart-daily"), {
+            type: "bar",
+            data: {
+                labels: dailyData.map(d => {
+                    const dt = new Date(d.day + "T12:00:00Z");
+                    return dt.toLocaleDateString("en", { month: "short", day: "numeric" });
+                }),
+                datasets: [
+                    {
+                        label: "Posts",
+                        data: dailyData.map(d => d.posts),
+                        backgroundColor: "#58a6ff66",
+                        borderColor: "#58a6ff",
+                        borderWidth: 1,
+                        borderRadius: 3,
+                        order: 2,
+                    },
+                    {
+                        label: "Authors",
+                        data: dailyData.map(d => d.authors),
+                        type: "line",
+                        borderColor: "#3fb950",
+                        backgroundColor: "#3fb95020",
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        pointBackgroundColor: "#3fb950",
+                        borderWidth: 2,
+                        order: 1,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: "top", align: "end", labels: { boxWidth: 10, font: { size: 11 } } } },
+                scales: {
+                    x: { ticks: { font: { size: 10 } } },
+                    y: { ticks: { font: { size: 10 } }, beginAtZero: true },
+                },
+            },
+        });
+    }
+
+    // ── Category bars ────────────────────────────────────────
     const catBars = $("#cat-bars");
     if (D.categories.length) {
         const maxCat = Math.max(...D.categories.map((c) => c.count));
@@ -136,6 +174,31 @@
                 <span class="hbar-value">${c.count}</span>
             `;
             catBars.appendChild(row);
+        });
+    }
+
+    // ── Language bars ────────────────────────────────────────
+    const langBars = $("#lang-bars");
+    if (D.languages && D.languages.length) {
+        const LANG_NAMES = {
+            en: "English", de: "German", fr: "French", es: "Spanish", ja: "Japanese",
+            pt: "Portuguese", zh: "Chinese", ko: "Korean", nl: "Dutch", it: "Italian",
+            ru: "Russian", da: "Danish", sv: "Swedish", uk: "Ukrainian", ar: "Arabic",
+        };
+        const maxLang = D.languages[0].count;
+        D.languages.forEach((l, i) => {
+            const pct = (l.count / maxLang) * 100;
+            const name = LANG_NAMES[l.lang] || l.lang;
+            const row = document.createElement("div");
+            row.className = "hbar-row";
+            row.innerHTML = `
+                <span class="hbar-label">${esc(name)}</span>
+                <div class="hbar-track">
+                    <div class="hbar-fill" style="width:${pct}%;background:${PAL[i % PAL.length]}"></div>
+                </div>
+                <span class="hbar-value">${l.count}</span>
+            `;
+            langBars.appendChild(row);
         });
     }
 
@@ -155,25 +218,50 @@
             responsive: true,
             cutout: "60%",
             plugins: {
-                legend: {
-                    position: "bottom",
-                    labels: { padding: 8, font: { size: 11 }, boxWidth: 10 },
-                },
+                legend: { position: "bottom", labels: { padding: 8, font: { size: 10 }, boxWidth: 10 } },
             },
         },
     });
 
-    // ── Hashtag cloud ────────────────────────────────────────
-    const cloud = $("#hashtag-cloud");
-    const maxTag = Math.max(...D.hashtags.map((h) => h.count));
-    D.hashtags.forEach((h) => {
-        const scale = 0.65 + (h.count / maxTag) * 0.85;
+    // ── Word Cloud with click-through ────────────────────────
+    const cloud = $("#word-cloud");
+    const maxWC = D.word_cloud.length ? D.word_cloud[0].count : 1;
+    // Color words by frequency tier
+    const wcColors = ["#f85149", "#d29922", "#58a6ff", "#a371f7", "#3fb950", "#8b949e"];
+    D.word_cloud.forEach((w, i) => {
+        const scale = 0.55 + (w.count / maxWC) * 1.2;
+        const colorIdx = Math.min(Math.floor(i / (D.word_cloud.length / wcColors.length)), wcColors.length - 1);
         const el = document.createElement("span");
-        el.className = "htag";
-        el.textContent = `#${h.tag}`;
+        el.className = "wc-word";
+        el.textContent = w.word;
         el.style.fontSize = `${scale}rem`;
-        el.title = `${h.count} posts`;
+        el.style.color = wcColors[colorIdx];
+        el.title = `${w.count} occurrences — click to see posts`;
+        el.addEventListener("click", () => showWordPosts(w.word));
         cloud.appendChild(el);
+    });
+
+    // ── Word cloud modal ─────────────────────────────────────
+    function showWordPosts(word) {
+        const modal = $("#word-modal");
+        const title = $("#modal-title");
+        const postsEl = $("#modal-posts");
+        const lower = word.toLowerCase();
+        const matches = allPosts.filter(p => p.text.toLowerCase().includes(lower));
+        // Deduplicate by URL
+        const seen = new Set();
+        const unique = matches.filter(p => { if (seen.has(p.url)) return false; seen.add(p.url); return true; });
+        title.textContent = `Posts mentioning "${word}" (${unique.length})`;
+        postsEl.innerHTML = "";
+        unique.slice(0, 20).forEach(p => postsEl.appendChild(postCard(p)));
+        if (unique.length === 0) {
+            postsEl.innerHTML = '<p style="color:var(--text-muted);padding:1rem">No matching posts found in current dataset.</p>';
+        }
+        modal.classList.remove("hidden");
+    }
+    $("#modal-close").addEventListener("click", () => $("#word-modal").classList.add("hidden"));
+    $("#word-modal").addEventListener("click", (e) => {
+        if (e.target === $("#word-modal")) $("#word-modal").classList.add("hidden");
     });
 
     // ── Links ────────────────────────────────────────────────
@@ -201,7 +289,6 @@
             : "";
         const rankCls = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : "";
         const rankHtml = rank != null ? `<div class="post-rank ${rankCls}">${rank}</div>` : "";
-        // Engagement bar proportions
         const engTotal = Math.max(p.likes + p.reposts + (p.replies || 0), 1);
         const lPct = (p.likes / engTotal) * 100;
         const rPct = (p.reposts / engTotal) * 100;
@@ -225,7 +312,7 @@
             <div class="post-footer">
                 <span class="post-stat">❤️ ${p.likes}</span>
                 <span class="post-stat">🔁 ${p.reposts}</span>
-                <span class="post-stat">💬 ${p.replies}</span>
+                <span class="post-stat">💬 ${p.replies || 0}</span>
                 <a class="post-link" href="${esc(p.url)}" target="_blank" rel="noopener">↗ bsky</a>
                 <span class="post-source">${esc(p.source)}</span>
             </div>
@@ -291,9 +378,7 @@
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: { position: "top", align: "end", labels: { boxWidth: 10, font: { size: 11 } } },
-                },
+                plugins: { legend: { position: "top", align: "end", labels: { boxWidth: 10, font: { size: 11 } } } },
                 scales: {
                     x: { ticks: { font: { size: 10 } } },
                     y: { ticks: { font: { size: 10 } } },
