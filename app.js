@@ -90,7 +90,7 @@
                 plugins: { legend: { labels: { color: "#8b949e" } } },
                 scales: {
                     x: {
-                        ticks: { color: "#8b949e", maxRotation: 45, maxTicksLimit: 24 },
+                        ticks: { color: "#8b949e", maxRotation: 45, maxTicksLimit: isMobile ? 8 : 24 },
                         grid: { color: "#30363d33" },
                     },
                     y: {
@@ -110,6 +110,9 @@
         });
     }
 
+    // ── Responsive helpers ────────────────────────────────────
+    const isMobile = window.innerWidth < 768;
+
     // ── Categories Chart ─────────────────────────────────────
     if (D.categories.length) {
         new Chart($("#chart-categories"), {
@@ -125,10 +128,11 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: !isMobile,
                 plugins: {
                     legend: {
-                        position: "right",
-                        labels: { color: "#8b949e", padding: 12, font: { size: 11 } },
+                        position: isMobile ? "bottom" : "right",
+                        labels: { color: "#8b949e", padding: 8, font: { size: isMobile ? 10 : 11 } },
                     },
                 },
             },
